@@ -159,8 +159,16 @@ def parse_fragment(html):
                     t = ch.get_text(" ", strip=True)
                     if t: parts.append(t)
             title = " ".join(parts).strip()
+        title = (title or "").strip()
+        if sub and title != sub and title.endswith(" " + sub):     # tvtv glues the
+            title = title[: -len(sub) - 1].strip()                 # episode onto the title
+        cat = None
+        my = re.search(r"\s*\((\d{4}),\s*([^)]+)\)\s*$", title)  # "Movie (2013, Science fiction)"
+        if my:
+            title = f"{title[:my.start()].strip()} ({my.group(1)})"
+            cat = my.group(2).strip()
         out.append({"start": start, "stop": start + timedelta(minutes=max(mins, 1)),
-                    "title": title or "Unknown", "sub": sub or None})
+                    "title": title or "Unknown", "sub": sub or None, "cat": cat})
     return out
 
 def tvtv_station(session, tmsid, day_keys):
@@ -373,15 +381,25 @@ def write_outputs(chans, progs):
                 sub = None
                 if not epnum:
                     epnum = [("onscreen", f"S{se:02d} E{ee:02d}"), ("xmltv_ns", f"{se-1}.{ee-1}.")]
-            if sub: s += f"<sub-title>{escape(sub)}</sub-title>"
-            if p.get("desc"): s += f"<desc>{escape(p['desc'])}</desc>"
-            if p.get("icon"): s += f"<icon src={quoteattr(p['icon'])}/>"
+            # normalise episode numbering: one spaced onscreen "S01 E05" + xmltv_ns,
+            # dropping nonsense seasons (Stingray feeds carry e.g. "S470000 E02")
+            se_pair = None
             for sysname, txt in epnum:
-                if txt:
-                    if sysname == "onscreen":       # house style: spaced "S01 E05"
-                        mm = re.match(r"^S(\d+)\s*E(\d+)$", txt.strip(), re.I)
-                        if mm: txt = f"S{int(mm.group(1)):02d} E{int(mm.group(2)):02d}"
-                    s += f'<episode-num system="{sysname or "onscreen"}">{escape(txt)}</episode-num>'
+                mm = re.match(r"^\s*S(\d+)\s*E(\d+)\s*$", txt or "", re.I)
+                if mm: se_pair = (int(mm.group(1)), int(mm.group(2))); break
+            if not se_pair:
+                for sysname, txt in epnum:
+                    mm = re.match(r"^\s*(\d+)\s*\.\s*(\d+)\s*\.", txt or "")
+                    if sysname == "xmltv_ns" and mm:
+                        se_pair = (int(mm.group(1)) + 1, int(mm.group(2)) + 1); break
+            if sub and norm(sub) != norm(p["title"]): s += f"<sub-title>{escape(sub)}</sub-title>"
+            if p.get("desc"): s += f"<desc>{escape(p['desc'])}</desc>"
+            if p.get("cat"): s += f"<category>{escape(p['cat'])}</category>"
+            if p.get("icon"): s += f"<icon src={quoteattr(p['icon'])}/>"
+            if se_pair and 0 < se_pair[0] <= 100 and 0 < se_pair[1] <= 9999:
+                se, ee = se_pair
+                s += f'<episode-num system="onscreen">S{se:02d} E{ee:02d}</episode-num>'
+                s += f'<episode-num system="xmltv_ns">{se-1}.{ee-1}.</episode-num>'
             lines.append(s + "</programme>"); n += 1
     lines.append("</tv>")
     data = ("\n".join(lines) + "\n").encode("utf-8")
