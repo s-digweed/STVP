@@ -33,7 +33,7 @@ jobs:
         env:
           TOKEN: ${{ secrets.KEEPALIVE_PAT || github.token }}
         run: |
-          mkdir pub && cp samsung.m3u samsung.xml.gz samsung_report.txt pub/
+          mkdir pub && cp samsung.xml.gz samsung_report.txt pub/
           cd pub
           git init -q -b output
           git config user.name  "github-actions[bot]"
@@ -41,4 +41,3 @@ jobs:
           git add -A
           git commit -q -m "Samsung TV Plus EPG $(date -u '+%Y-%m-%d %H:%M UTC')"
           git push -q -f "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" output
-          
