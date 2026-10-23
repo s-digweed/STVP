@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Samsung TV Plus (US / CA / UK) — M3U + extended EPG.
+Samsung TV Plus — extended EPG (all regions Matt publishes; Gracenote extension for US).
 
 Two sources, merged per channel:
   1. Matt Huisman's mirror (i.mjh.nz/SamsungTVPlus) — every channel, but only a
@@ -15,7 +15,7 @@ overlap. Safety check: if tvtv's "now playing" doesn't resemble Matt's, the
 mapping is assumed wrong and that channel stays on Matt's data (see report).
 If tvtv is unreachable, the build still writes the Matt-only guide.
 
-Outputs: samsung.m3u, samsung.xml.gz, samsung_report.txt
+Outputs: samsung.xml.gz, samsung_report.txt
 """
 import csv, gzip, json, os, re, sys, time, unicodedata, difflib
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -26,22 +26,18 @@ import xml.etree.ElementTree as ET
 import requests
 
 # ── config ────────────────────────────────────────────────────────────────────
-REGIONS     = ["us", "ca", "gb"]                 # Matt region codes (gb = UK)
-REGION_LABEL = {"us": "US", "ca": "CA", "gb": "UK"}
+# The EPG covers EVERY region Matt publishes (us ca gb de fr es it at ch in kr …),
+# DRM channels included, so other playlists using Samsung tvg-ids get a guide too.
 TVTV_DAYS   = int(os.getenv("TVTV_DAYS", "3"))   # UTC days fetched: today + N-1
 TVTV_WORKERS = 6
 KEEP_PAST_H = 3                                  # keep this many hours of past guide
-SKIP_DRM    = True                               # DRM channels won't play in TiviMate
 
 MATT_CHANNELS = "https://i.mjh.nz/SamsungTVPlus/.channels.json.gz"
-MATT_EPG      = "https://i.mjh.nz/SamsungTVPlus/{region}.xml.gz"
-STREAM_URL    = "https://jmp2.uk/stvp-{id}"
+MATT_EPG      = "https://i.mjh.nz/SamsungTVPlus/all.xml.gz"
 TVTV_BASE     = "https://tvtv.us"
 MAP_FILE      = "samsung_gracenote_map.csv"
-OUT_M3U, OUT_EPG, OUT_REPORT = "samsung.m3u", "samsung.xml.gz", "samsung_report.txt"
+OUT_EPG, OUT_REPORT = "samsung.xml.gz", "samsung_report.txt"
 
-REPO = os.getenv("GITHUB_REPOSITORY", "s-digweed/Sammy")
-EPG_RAW = f"https://raw.githubusercontent.com/{REPO}/output/{OUT_EPG}"   # outputs live on the "output" branch
 
 # offline testing hooks (not used in Actions)
 MATT_CHANNELS_FILE = os.getenv("MATT_CHANNELS_FILE")
@@ -87,35 +83,34 @@ def get_gz(url, path=None):
 # ── 1. Matt: channels + ~6h EPG ───────────────────────────────────────────────
 def load_matt():
     data = json.loads(get_gz(MATT_CHANNELS, MATT_CHANNELS_FILE))
-    chans, drm = {}, 0
-    for rg in REGIONS:
-        for cid, c in data["regions"].get(rg, {}).get("channels", {}).items():
-            if SKIP_DRM and c.get("license_url"):
-                drm += 1; continue
+    chans = {}
+    for rg, R in data["regions"].items():
+        for cid, c in R.get("channels", {}).items():
             chans[cid] = {"name": c["name"].strip(), "logo": c.get("logo", ""),
-                          "group": c.get("group", "Other"), "chno": c.get("chno"), "region": rg}
+                          "group": c.get("group", "Other"), "chno": c.get("chno"), "region": rg,
+                          "drm": bool(c.get("license_url"))}
     progs = {cid: [] for cid in chans}
-    for rg in REGIONS:
-        try:
-            root = ET.fromstring(get_gz(MATT_EPG.format(region=rg), MATT_EPG_FILE))
-        except Exception as e:
-            log(f"!! Matt EPG {rg} failed: {e}"); continue
-        for p in root.findall("programme"):
-            cid = p.get("channel")
-            if cid not in progs: continue
-            ep = {"start": parse_xmltv(p.get("start")), "stop": parse_xmltv(p.get("stop")),
-                  "title": p.findtext("title") or "", "sub": p.findtext("sub-title"),
-                  "desc": p.findtext("desc"), "icon": None, "epnum": []}
-            ic = p.find("icon")
-            if ic is not None: ep["icon"] = ic.get("src")
-            for en in p.findall("episode-num"):
-                ep["epnum"].append((en.get("system"), en.text))
-            progs[cid].append(ep)
+    try:
+        root = ET.fromstring(get_gz(MATT_EPG, MATT_EPG_FILE))
+    except Exception as e:
+        log(f"!! Matt EPG download failed: {e}"); root = ET.fromstring("<tv/>")
+    for p in root.findall("programme"):
+        cid = p.get("channel")
+        if cid not in progs: continue
+        ep = {"start": parse_xmltv(p.get("start")), "stop": parse_xmltv(p.get("stop")),
+              "title": p.findtext("title") or "", "sub": p.findtext("sub-title"),
+              "desc": p.findtext("desc"), "icon": None, "epnum": []}
+        ic = p.find("icon")
+        if ic is not None: ep["icon"] = ic.get("src")
+        for en in p.findall("episode-num"):
+            ep["epnum"].append((en.get("system"), en.text))
+        progs[cid].append(ep)
     for cid, v in progs.items():                 # sort + de-duplicate by start time
         v.sort(key=lambda x: x["start"])
         progs[cid] = [p for i, p in enumerate(v) if i == 0 or p["start"] != v[i - 1]["start"]]
-    log(f"Matt: {len(chans)} channels ({', '.join(REGION_LABEL[r] for r in REGIONS)}), "
-        f"{sum(map(len, progs.values()))} programmes, {drm} DRM channels skipped")
+    regs = sorted({c["region"] for c in chans.values()})
+    log(f"Matt: {len(chans)} channels in {len(regs)} regions ({' '.join(regs)}), "
+        f"{sum(map(len, progs.values()))} programmes")
     return chans, progs
 
 # ── 2. tvtv.us Gracenote listings ─────────────────────────────────────────────
@@ -285,15 +280,22 @@ def compare(m, t):
     return timed / len(sam), titled / len(sam), len(sam), odd
 
 def accept(m, t, name):
-    if is_generic(t, name): return False, "Gracenote has only placeholder listings"
     sc = compare(m, t)
     mn, tn = now_item(m), now_item(t)
     if sc:
         timed, titled, n, odd = sc
         if titled >= 0.4 or (timed >= 0.75 and odd >= 0.5):
             return True, f"{timed:.0%} start times / {titled:.0%} titles agree over {n} programmes"
+    if mn and tn and title_match(mn, tn):
+        return True, "now-playing agrees"
+    # Single-show / loop channels (Degrassi, Duck Dynasty, Stingray music…): Gracenote
+    # lists the channel's own name as the programme — that CONFIRMS the mapping.
+    win = [x for x in t if NOW - timedelta(hours=1) <= x["start"] < NOW + timedelta(hours=24)]
+    if win and sum(1 for x in win if similar(x["title"], name)) / len(win) >= 0.6:
+        return True, "single-show channel (Gracenote lists the channel's own name)"
+    if is_generic(t, name):
+        return False, "Gracenote has only placeholder listings (e.g. 'To Be Announced')"
     if mn and tn:
-        if title_match(mn, tn): return True, "now-playing agrees"
         return False, (f"Samsung '{mn['title']}' vs Gracenote '{tn['title']}'"
                        + (f" ({sc[0]:.0%} times / {sc[1]:.0%} titles agree)" if sc else ""))
     if not m: return True, "no Samsung guide to compare — Gracenote used as-is"
@@ -309,7 +311,7 @@ def splice(m, t):
         tail[0]["start"] = edge                    # trim the straddling airing
     return m + tail
 
-def merge(chans, matt, tvtv_got):
+def merge(chans, matt, tvtv_got, mapping):
     out, used, rejected, remapped, empty = {}, 0, [], [], 0
     pool = {cid: t for cid, t in tvtv_got.items()
             if t and not is_generic(t, chans[cid]["name"])}
@@ -330,9 +332,10 @@ def merge(chans, matt, tvtv_got):
             if best:
                 oc, sc = best
                 t = ot = pool[oc]
-                remapped.append(f"{chans[cid]['name']} [{cid}] -> uses Gracenote station of "
-                                f"{chans[oc]['name']} ({sc[0]:.0%} times / {sc[1]:.0%} titles agree)"
-                                " — swap these two in samsung_gracenote_map.csv")
+                remapped.append(f"{chans[cid]['name']} [{cid}] -> using station {mapping.get(oc)} "
+                                f"(listed for {chans[oc]['name']}; {sc[0]:.0%} times / {sc[1]:.0%} "
+                                f"titles agree). To make it permanent, change {cid}'s tmsid from "
+                                f"{mapping.get(cid)} to {mapping.get(oc)} in samsung_gracenote_map.csv")
                 ok = True
         if not ok:
             rejected.append(f"{chans[cid]['name']} [{cid}]: {why}")
@@ -352,16 +355,8 @@ def merge(chans, matt, tvtv_got):
 SE_RE = re.compile(r"^\s*S(\d{1,3})\s*E(\d{1,4})\s*$", re.I)
 
 def write_outputs(chans, progs):
-    order = sorted(chans, key=lambda c: (REGIONS.index(chans[c]["region"]),
-                                         chans[c]["chno"] or 99999, chans[c]["name"].lower()))
-    with open(OUT_M3U, "w", encoding="utf-8") as f:
-        f.write(f'#EXTM3U url-tvg="{EPG_RAW}"\n')
-        for cid in order:
-            c = chans[cid]
-            grp = f'{REGION_LABEL[c["region"]]} - {c["group"]}'
-            chno = f' tvg-chno="{c["chno"]}"' if c["chno"] else ""
-            f.write(f'#EXTINF:-1 tvg-id="{cid}" tvg-name="{c["name"]}" tvg-logo="{c["logo"]}"'
-                    f' group-title="{grp}"{chno},{c["name"]}\n{STREAM_URL.format(id=cid)}\n')
+    order = sorted(chans, key=lambda c: (chans[c]["region"], chans[c]["chno"] or 99999,
+                                         chans[c]["name"].lower()))
     keep_from = NOW - timedelta(hours=KEEP_PAST_H)
     lines = ['<?xml version="1.0" encoding="UTF-8"?>', '<tv generator-info-name="samsung-gracenote">']
     for cid in order:
@@ -406,7 +401,7 @@ def write_outputs(chans, progs):
     ET.fromstring(data)                              # refuse to write invalid XML
     with gzip.open(OUT_EPG, "wb", compresslevel=9) as f:
         f.write(data)
-    log(f"wrote {OUT_M3U} ({len(order)} channels) and {OUT_EPG} ({n} programmes)")
+    log(f"wrote {OUT_EPG} ({len(order)} channels, all regions, {n} programmes)")
 
 def horizon_stats(chans, progs, mapping, label):
     hrs = []
@@ -427,7 +422,7 @@ def main():
     except Exception as e:
         log(f"!! tvtv stage failed entirely ({e}) — writing Samsung/Matt-only guide")
         mapping, got = {}, {}
-    progs = merge(chans, matt, got)
+    progs = merge(chans, matt, got, mapping)
     write_outputs(chans, progs)
     horizon_stats(chans, progs, mapping, "mapped")
     horizon_stats(chans, progs, mapping, "unmapped")
