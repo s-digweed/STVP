@@ -64,13 +64,16 @@ def parse_xmltv(s):
 def norm(s):
     s = unicodedata.normalize("NFKD", s or "")
     s = "".join(c for c in s if not unicodedata.combining(c)).lower().replace("&", "and")
+    s = re.sub(r"['\u2019\u2018`]", "", s)          # America's -> americas (keeps acronyms intact)
     s = re.sub(r"\b(the|a|an)\b", " ", s)
     return re.sub(r"[^a-z0-9]+", " ", s).strip()
 
 def similar(a, b):
     a, b = norm(a), norm(b)
     if not a or not b: return False
-    if a == b or a in b or b in a: return True
+    if a == b: return True
+    short, long_ = (a, b) if len(a) <= len(b) else (b, a)
+    if len(short) >= 5 and short in long_: return True
     return difflib.SequenceMatcher(None, a, b).ratio() >= 0.6
 
 def get_gz(url, path=None):
@@ -208,43 +211,133 @@ def load_tvtv(chans):
     return mapping, got
 
 # ── 3. merge ──────────────────────────────────────────────────────────────────
+GENERIC_RE = re.compile(r"\b(to be announced|tba|programming|off air|sign off|paid programming)\b", re.I)
+STOP = {"and", "with", "the", "of", "in", "on", "for", "vs", "v", "live", "new", "show", "tv"}
+
 def now_item(items):
     for it in items:
         if it["start"] <= NOW < it["stop"]: return it
     return None
 
+def tokens(s):
+    return {w for w in norm(s).split() if w not in STOP and (len(w) > 2 or w.isdigit())}
+
+def acronym(s):
+    return "".join(w[0] for w in norm(s).split() if w)
+
+def abbrev_of(short, initials):
+    """AFV ~ America's Funniest Home Videos: same first/last initial, letters in
+    order, at most one word skipped."""
+    if len(short) < 3 or not initials or len(initials) - len(short) not in (0, 1): return False
+    if short[0] != initials[0] or short[-1] != initials[-1]: return False
+    it = iter(initials)
+    return all(c in it for c in short)
+
+def title_match(a, b):
+    """a = Samsung programme, b = Gracenote airing. Titles are often worded
+    differently between the two, so compare titles AND sub-titles, abbreviations
+    (AFV = America's Funniest Home Videos) and shared keywords."""
+    for x in (a["title"], a.get("sub")):
+        for y in (b["title"], b.get("sub")):
+            if x and y and similar(x, y): return True
+    sa = norm(a["title"]).replace(" ", "")
+    for full in (b["title"], b.get("sub") or ""):
+        if abbrev_of(sa, acronym(full)): return True
+    A = tokens(f'{a["title"]} {a.get("sub") or ""}')
+    B = tokens(f'{b["title"]} {b.get("sub") or ""}')
+    if A and B:
+        shared = len(A & B)
+        if shared >= 2 and shared / min(len(A), len(B)) >= 0.5: return True
+    return False
+
+def is_generic(t, name):
+    """Gracenote sometimes only has a placeholder (channel name / 'To Be Announced')."""
+    win = [x for x in t if NOW - timedelta(hours=1) <= x["start"] < NOW + timedelta(hours=24)]
+    if not win: return True
+    bad = sum(1 for x in win if GENERIC_RE.search(x["title"])
+              or (similar(x["title"], name) and not x.get("sub")))
+    return bad / len(win) >= 0.6
+
+def compare(m, t):
+    """Score how well a Gracenote schedule matches Samsung's over their overlap
+    (now-1h .. end of Samsung data): share of Samsung programmes with a Gracenote
+    airing starting within 3 min (time), and of those, how many titles agree."""
+    if not m: return None
+    sam = [x for x in m if NOW - timedelta(hours=1) <= x["start"] < m[-1]["stop"]]
+    if len(sam) < 2: return None
+    timed = titled = 0
+    # share of Samsung starts that are "irregular" (not on a :00/:30 grid) — only
+    # those make a time-alignment match meaningful (hourly news grids all align)
+    odd = sum(1 for x in sam if x["start"].minute % 30 or x["start"].second) / len(sam)
+    for x in sam:
+        near = [y for y in t if abs((y["start"] - x["start"]).total_seconds()) <= 180]
+        if near:
+            timed += 1
+            if any(title_match(x, y) for y in near): titled += 1
+    return timed / len(sam), titled / len(sam), len(sam), odd
+
+def accept(m, t, name):
+    if is_generic(t, name): return False, "Gracenote has only placeholder listings"
+    sc = compare(m, t)
+    mn, tn = now_item(m), now_item(t)
+    if sc:
+        timed, titled, n, odd = sc
+        if titled >= 0.4 or (timed >= 0.75 and odd >= 0.5):
+            return True, f"{timed:.0%} start times / {titled:.0%} titles agree over {n} programmes"
+    if mn and tn:
+        if title_match(mn, tn): return True, "now-playing agrees"
+        return False, (f"Samsung '{mn['title']}' vs Gracenote '{tn['title']}'"
+                       + (f" ({sc[0]:.0%} times / {sc[1]:.0%} titles agree)" if sc else ""))
+    if not m: return True, "no Samsung guide to compare — Gracenote used as-is"
+    return False, "too little overlap to verify"
+
+def splice(m, t):
+    """Samsung's own data wins for as far as it goes (descriptions, artwork,
+    episode numbers); Gracenote continues from where it ends."""
+    if not m: return [dict(x) for x in t]
+    edge = m[-1]["stop"]
+    tail = [dict(x) for x in t if x["stop"] > edge + timedelta(minutes=5)]
+    if tail and tail[0]["start"] < edge:
+        tail[0]["start"] = edge                    # trim the straddling airing
+    return m + tail
+
 def merge(chans, matt, tvtv_got):
-    used, mismatch, empty = 0, [], 0
-    out = {}
+    out, used, rejected, remapped, empty = {}, 0, [], [], 0
+    pool = {cid: t for cid, t in tvtv_got.items()
+            if t and not is_generic(t, chans[cid]["name"])}
     for cid in chans:
-        m = matt.get(cid, [])
-        t = tvtv_got.get(cid)
+        m, t = matt.get(cid, []), tvtv_got.get(cid)
         if not t:
             if t is not None: empty += 1
             out[cid] = m; continue
-        mn, tn = now_item(m), now_item(t)
-        if mn and tn and not similar(mn["title"], tn["title"]):
-            # tolerate the next/previous slot matching (minor clock skew)
-            near = [x for x in t if abs((x["start"] - mn["start"]).total_seconds()) <= 1800]
-            if not any(similar(mn["title"], x["title"]) for x in near):
-                mismatch.append(f"{chans[cid]['name']} [{cid}]: Samsung '{mn['title']}' vs Gracenote '{tn['title']}'")
-                out[cid] = m; continue
-        # Samsung's own data wins for as far as it goes (it has descriptions,
-        # artwork and episode numbers); Gracenote continues from where it ends.
-        if m:
-            edge = m[-1]["stop"]
-            tail = [dict(x) for x in t if x["stop"] > edge + timedelta(minutes=5)]
-            if tail and tail[0]["start"] < edge:
-                tail[0]["start"] = edge            # trim the straddling airing
-            merged = m + tail
-        else:
-            merged = t
-        out[cid] = merged; used += 1
-    log(f"merge: {used} channels extended with Gracenote, {len(mismatch)} rejected "
-        f"(now-playing mismatch), {empty} returned no airings")
-    if mismatch:
-        log("  rejected mappings (kept on Samsung/Matt data):")
-        for x in mismatch: log("   - " + x)
+        ok, why = accept(m, t, chans[cid]["name"])
+        if not ok and m:
+            # wrong/swapped mapping? look for the station that really matches
+            best = None
+            for oc, ot in pool.items():
+                if oc == cid: continue
+                sc = compare(m, ot)
+                if sc and sc[1] >= 0.5 and sc[0] >= 0.6 and (not best or sc[1] > best[1][1]):
+                    best = (oc, sc)
+            if best:
+                oc, sc = best
+                t = ot = pool[oc]
+                remapped.append(f"{chans[cid]['name']} [{cid}] -> uses Gracenote station of "
+                                f"{chans[oc]['name']} ({sc[0]:.0%} times / {sc[1]:.0%} titles agree)"
+                                " — swap these two in samsung_gracenote_map.csv")
+                ok = True
+        if not ok:
+            rejected.append(f"{chans[cid]['name']} [{cid}]: {why}")
+            out[cid] = m; continue
+        out[cid] = splice(m, t); used += 1
+    log(f"merge: {used} channels extended with Gracenote, {len(remapped)} auto-remapped, "
+        f"{len(rejected)} kept on Samsung data, {empty} returned no airings")
+    if remapped:
+        log("  auto-remapped (mapping looked wrong, matching station found):")
+        for x in remapped: log("   - " + x)
+    if rejected:
+        log("  kept on Samsung/Matt data:")
+        for x in rejected: log("   - " + x)
     return out
 
 # ── 4. write ──────────────────────────────────────────────────────────────────
