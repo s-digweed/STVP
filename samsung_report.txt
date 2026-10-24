@@ -1,0 +1,29 @@
+Samsung TV Plus build 2026-10-24 12:43 UTC
+Matt: 2662 channels in 11 regions (at ca ch de es fr gb in it kr us), 23839 programmes
+tvtv: 276 mapped channels in this lineup, 3 day(s) each (828 requests)
+tvtv: session via curl_cffi/chrome, homepage HTTP 200
+tvtv: data for 276 / 276 channels
+merge: 257 channels extended with Gracenote, 0 auto-remapped, 19 kept on Samsung data, 0 returned no airings
+  kept on Samsung/Matt data:
+   - Hallmark Movies & More [USBD270001633]: Gracenote has only placeholder listings (e.g. 'To Be Announced')
+   - Maverick Black Cinema [USAJ3000007MT]: Samsung 'Mistress for Hire' vs Gracenote 'False Profits' (0% times / 0% titles agree)
+   - Brat TV [USBC240001823]: Samsung 'Stage Fright' vs Gracenote 'Crown Lake' (18% times / 0% titles agree)
+   - Home Refresh [USBC21000142T]: Samsung 'Renovate or Rebuild' vs Gracenote 'Buying the View' (0% times / 0% titles agree)
+   - America's Test Kitchen [USBA3800002KI]: Samsung 'Cook's Country' vs Gracenote 'Julia at Home' (15% times / 0% titles agree)
+   - Tastemade [USBD7000189R]: Samsung 'Worth the Hype' vs Gracenote 'Struggle Meals' (15% times / 8% titles agree)
+   - PBS Food [US13000081O]: Samsung 'Lidia Celebrates America: Home for the Holidays' vs Gracenote 'Finding Edna Lewis' (50% times / 0% titles agree)
+   - Unbeaten Sports Channel [US1400008DW]: Samsung 'LIVE' vs Gracenote 'Cycling Highlights' (33% times / 33% titles agree)
+   - SURFER TV [USBB10000058A]: Samsung 'Expencive Porno' vs Gracenote 'Paradigm Lost' (12% times / 0% titles agree)
+   - Discovery Turbo TV [USBC3600005U9]: Samsung 'Bitchin' Rides' vs Gracenote 'All Girls Garage' (25% times / 0% titles agree)
+   - LOL! Network [USBC1300009VM]: Samsung 'The Ten' vs Gracenote 'Real Husbands of Hollywood' (25% times / 0% titles agree)
+   - Laff More [US3700002P0]: Samsung 'The Beverly Hillbillies' vs Gracenote 'Bob Hearts Abishola' (100% times / 33% titles agree)
+   - Always Funny Videos [USBA1600001XM]: Samsung 'Totally Funny Animals' vs Gracenote 'World's Funniest Videos: Top 10 Countdown' (69% times / 0% titles agree)
+   - It’s Anime [US11000020V]: Samsung 'Rampo Kitan: Game of Laplace' vs Gracenote 'Ushio & Tora' (0% times / 0% titles agree)
+   - Anime All day [USAJ3504502A]: Samsung 'Car with a Brain' vs Gracenote 'Ushio & Tora' (0% times / 0% titles agree)
+   - Love Pets [US300065DB]: Samsung 'Hope For Wildlife' vs Gracenote 'The Open Road With Dr. Chris' (38% times / 0% titles agree)
+   - WildEarth [US3800007CR]: Samsung 'KenyaLIVE Afternoon' vs Gracenote 'SafariLIVE Sunset' (0% times / 0% titles agree)
+   - ZooMoo [USBC2400019EF]: Samsung 'Jelly Jamm' vs Gracenote 'Señorita Araña' (100% times / 15% titles agree)
+   - CJ ENM K-POP [US39000038W]: Samsung 'That dance you saw in the challenge! Perfect for short-form content lovers' vs Gracenote 'Stingray Today's K-Pop US' (0% times / 0% titles agree)
+wrote samsung.xml.gz (2662 channels, all regions, 39595 programmes)
+  hours of guide ahead — mapped   channels: median 59.5h, min 5.7h, max 62.3h  (n=276)
+  hours of guide ahead — unmapped channels: median 6.0h, min 0.0h, max 11.8h  (n=2386)
