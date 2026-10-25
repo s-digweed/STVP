@@ -31,6 +31,12 @@ import requests
 TVTV_DAYS   = int(os.getenv("TVTV_DAYS", "3"))   # UTC days fetched: today + N-1
 TVTV_WORKERS = 6
 KEEP_PAST_H = 3                                  # keep this many hours of past guide
+# Gracenote-only output: write ONLY tvtv/Gracenote airings, and only for channels whose
+# Gracenote station checked out against Samsung's own guide. Samsung's programmes are
+# still downloaded - purely to verify each mapping - but never written, so this guide
+# is an independent second source rather than a copy of Samsung's.
+# Set GRACENOTE_ONLY=0 for the old behaviour (Samsung first, Gracenote after).
+GRACENOTE_ONLY = os.getenv("GRACENOTE_ONLY", "1") != "0"
 
 MATT_CHANNELS = "https://i.mjh.nz/SamsungTVPlus/.channels.json.gz"
 MATT_EPG      = "https://i.mjh.nz/SamsungTVPlus/all.xml.gz"
@@ -319,7 +325,8 @@ def merge(chans, matt, tvtv_got, mapping):
         m, t = matt.get(cid, []), tvtv_got.get(cid)
         if not t:
             if t is not None: empty += 1
-            out[cid] = m; continue
+            if not GRACENOTE_ONLY: out[cid] = m
+            continue
         ok, why = accept(m, t, chans[cid]["name"])
         if not ok and m:
             # wrong/swapped mapping? look for the station that really matches
@@ -339,15 +346,20 @@ def merge(chans, matt, tvtv_got, mapping):
                 ok = True
         if not ok:
             rejected.append(f"{chans[cid]['name']} [{cid}]: {why}")
-            out[cid] = m; continue
-        out[cid] = splice(m, t); used += 1
-    log(f"merge: {used} channels extended with Gracenote, {len(remapped)} auto-remapped, "
-        f"{len(rejected)} kept on Samsung data, {empty} returned no airings")
+            if not GRACENOTE_ONLY: out[cid] = m
+            continue
+        out[cid] = [dict(x) for x in t] if GRACENOTE_ONLY else splice(m, t); used += 1
+    if GRACENOTE_ONLY:
+        log(f"merge (Gracenote-only): {used} channels written from Gracenote, {len(remapped)} "
+            f"auto-remapped, {len(rejected)} left out (mapping didn't verify), {empty} returned no airings")
+    else:
+        log(f"merge: {used} channels extended with Gracenote, {len(remapped)} auto-remapped, "
+            f"{len(rejected)} kept on Samsung data, {empty} returned no airings")
     if remapped:
         log("  auto-remapped (mapping looked wrong, matching station found):")
         for x in remapped: log("   - " + x)
     if rejected:
-        log("  kept on Samsung/Matt data:")
+        log("  left out (no verified Gracenote station):" if GRACENOTE_ONLY else "  kept on Samsung/Matt data:")
         for x in rejected: log("   - " + x)
     return out
 
@@ -355,8 +367,8 @@ def merge(chans, matt, tvtv_got, mapping):
 SE_RE = re.compile(r"^\s*S(\d{1,3})\s*E(\d{1,4})\s*$", re.I)
 
 def write_outputs(chans, progs):
-    order = sorted(chans, key=lambda c: (chans[c]["region"], chans[c]["chno"] or 99999,
-                                         chans[c]["name"].lower()))
+    order = sorted((c for c in chans if not GRACENOTE_ONLY or progs.get(c)),
+                   key=lambda c: (chans[c]["region"], chans[c]["chno"] or 99999, chans[c]["name"].lower()))
     keep_from = NOW - timedelta(hours=KEEP_PAST_H)
     lines = ['<?xml version="1.0" encoding="UTF-8"?>', '<tv generator-info-name="samsung-gracenote">']
     for cid in order:
@@ -401,7 +413,8 @@ def write_outputs(chans, progs):
     ET.fromstring(data)                              # refuse to write invalid XML
     with gzip.open(OUT_EPG, "wb", compresslevel=9) as f:
         f.write(data)
-    log(f"wrote {OUT_EPG} ({len(order)} channels, all regions, {n} programmes)")
+    log(f"wrote {OUT_EPG} ({len(order)} channels, {n} programmes"
+        + (", Gracenote only)" if GRACENOTE_ONLY else ", all regions)"))
 
 def horizon_stats(chans, progs, mapping, label):
     hrs = []
