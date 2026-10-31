@@ -1,0 +1,29 @@
+Samsung TV Plus build 2026-10-31 20:00 UTC
+Matt: 2658 channels in 11 regions (at ca ch de es fr gb in it kr us), 22611 programmes
+tvtv: 276 mapped channels in this lineup, 3 day(s) each (828 requests)
+tvtv: session via curl_cffi/chrome, homepage HTTP 200
+tvtv: data for 276 / 276 channels
+merge (Gracenote-only): 257 channels written from Gracenote, 0 auto-remapped, 19 left out (mapping didn't verify), 0 returned no airings
+  left out (no verified Gracenote station):
+   - Bloomberg Originals [USAJ30000041W]: Samsung 'Take a Break' vs Gracenote 'Bloomberg Primer' (50% times / 0% titles agree)
+   - Hallmark Movies & More [USBD270001633]: Gracenote has only placeholder listings (e.g. 'To Be Announced')
+   - Maverick Black Cinema [USAJ3000007MT]: Samsung 'Halloween Kickback' vs Gracenote 'Rhythm and Revenge' (25% times / 0% titles agree)
+   - Brat TV [USBC240001823]: Samsung 'Crown Lake' vs Gracenote 'Chicken Girls: The Movie' (0% times / 0% titles agree)
+   - Home Refresh [USBC21000142T]: Samsung 'I Wrecked My House' vs Gracenote 'Hot Market' (10% times / 10% titles agree)
+   - America's Test Kitchen [USBA3800002KI]: Samsung 'Cook's Country' vs Gracenote 'Julia at Home' (23% times / 0% titles agree)
+   - PBS Food [US13000081O]: Samsung 'Jacques Pépin' vs Gracenote 'Somewhere South' (0% times / 0% titles agree)
+   - SURFER TV [USBB10000058A]: Samsung 'L E N A' vs Gracenote 'Who Is JOB' (17% times / 0% titles agree)
+   - Discovery Turbo TV [USBC3600005U9]: Samsung 'Bitchin' Rides' vs Gracenote 'All Girls Garage' (25% times / 0% titles agree)
+   - LOL! Network [USBC1300009VM]: Samsung 'Dear White People' vs Gracenote 'Real Husbands of Hollywood' (25% times / 0% titles agree)
+   - FailArmy [USAJ3504702A]: Samsung 'FailFactory | Failloween' vs Gracenote '#Worst Fears' (33% times / 8% titles agree)
+   - Nosey [USAJ34000022E]: Samsung 'Jerry Springer' vs Gracenote 'Channel No Longer Available' (0% times / 0% titles agree)
+   - It’s Anime [US11000020V]: Samsung 'My Hero Academia' vs Gracenote 'The Eminence in Shadow' (54% times / 0% titles agree)
+   - Anime All day [USAJ3504502A]: Samsung 'The Miasma of the Void, Cool Ice, Part 1' vs Gracenote 'The Eminence in Shadow' (58% times / 0% titles agree)
+   - Love Pets [US300065DB]: Samsung 'Dr. Savannah: Wild Rose Vet' vs Gracenote 'The Open Road With Dr. Chris' (33% times / 0% titles agree)
+   - WildEarth [US3800007CR]: Samsung 'SafariLIVE Sunrise Repeat' vs Gracenote 'Escape to Nature' (33% times / 0% titles agree)
+   - ZooMoo [USBC2400019EF]: Samsung 'Jelly Jamm' vs Gracenote 'Leo, el explorador' (100% times / 0% titles agree)
+   - CJ ENM K-POP [US39000038W]: Samsung 'A collection of hot performances! Idol playlist to recharge your energy' vs Gracenote 'Stingray Today's K-Pop US' (0% times / 0% titles agree)
+   - ZenLIFE by Stingray [USBD3500027DS]: Samsung 'The Zen Home Spa' vs Gracenote 'Sleep Hotel' (0% times / 0% titles agree)
+wrote samsung.xml.gz (257 channels, 16223 programmes, Gracenote only)
+  hours of guide ahead — mapped   channels: median 52.2h, min 0.0h, max 61.5h  (n=276)
+  hours of guide ahead — unmapped channels: median 0.0h, min 0.0h, max 0.0h  (n=2382)
