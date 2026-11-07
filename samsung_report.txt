@@ -1,0 +1,33 @@
+Samsung TV Plus build 2026-11-07 14:55 UTC
+Matt: 2665 channels in 11 regions (at ca ch de es fr gb in it kr us), 23577 programmes
+tvtv: 276 mapped channels in this lineup, 3 day(s) each (828 requests)
+tvtv: session via curl_cffi/chrome, homepage HTTP 200
+tvtv: data for 276 / 276 channels
+merge (Gracenote-only): 253 channels written from Gracenote, 0 auto-remapped, 23 left out (mapping didn't verify), 0 returned no airings
+  left out (no verified Gracenote station):
+   - Bloomberg Originals [USAJ30000041W]: Samsung 'Take Charge' vs Gracenote 'The Amazon Divide' (50% times / 0% titles agree)
+   - Hallmark Holiday Favorites [USBD270001633]: Gracenote has only placeholder listings (e.g. 'To Be Announced')
+   - Maverick Black Cinema [USAJ3000007MT]: Samsung 'Say Less' vs Gracenote 'Reality TV Murders' (0% times / 0% titles agree)
+   - Western Bound [USBC3200020QF]: Samsung 'No information' vs Gracenote 'The Young Land' (100% times / 0% titles agree)
+   - Brat TV [USBC240001823]: Samsung 'Crown Lake' vs Gracenote 'Chicken Girls' (9% times / 0% titles agree)
+   - Home Refresh [USBC21000142T]: Samsung 'Renovate or Rebuild' vs Gracenote 'Hot Market' (29% times / 0% titles agree)
+   - The Martha Stewart Channel [US4500011SP]: Samsung 'No information' vs Gracenote 'Martha Stewart Living' (9% times / 0% titles agree)
+   - Emeril Lagasse Channel [US4500010B0]: Samsung 'No information' vs Gracenote 'Essence of Emeril' (33% times / 0% titles agree)
+   - America's Test Kitchen [USBA3800002KI]: Samsung 'America's Test Kitchen' vs Gracenote 'Julia at Home' (14% times / 0% titles agree)
+   - PBS Food [US13000081O]: Samsung 'Lidia Celebrates America: Life's Milestones' vs Gracenote 'The Nature of Things' (0% times / 0% titles agree)
+   - Pac-12 Channel [USBA300034DB]: Samsung 'The Beaver Way' vs Gracenote 'Bronco Studios' (25% times / 17% titles agree)
+   - SURFER TV [USBB10000058A]: Samsung 'The Old, The Young, and The Sea' vs Gracenote 'The Curious Tales of Ítalo Ferreira' (0% times / 0% titles agree)
+   - Discovery Turbo TV [USBC3600005U9]: Samsung 'FourWheeler' vs Gracenote 'All Girls Garage' (30% times / 0% titles agree)
+   - LOL! Network [USBC1300009VM]: Samsung 'Wedding Daze' vs Gracenote 'Real Husbands of Hollywood' (50% times / 0% titles agree)
+   - Laff More [US3700002P0]: Samsung 'The Beverly Hillbillies' vs Gracenote 'That '70s Show' (100% times / 36% titles agree)
+   - FailArmy [USAJ3504702A]: Samsung 'FailArmy' vs Gracenote 'Fall of Fame' (0% times / 0% titles agree)
+   - Nosey [USAJ34000022E]: Samsung 'Jerry Springer' vs Gracenote 'Channel No Longer Available' (0% times / 0% titles agree)
+   - It’s Anime [US11000020V]: Samsung 'No information' vs Gracenote 'Ushio & Tora' (23% times / 0% titles agree)
+   - Anime All day [USAJ3504502A]: Samsung 'Buzz Buzz Buzz go the Killer Bees: A Bride Fallen from the Sky' vs Gracenote 'Ushio & Tora' (31% times / 0% titles agree)
+   - Love Pets [US300065DB]: Samsung 'Hope For Wildlife' vs Gracenote 'Lucky Dog: Reunions' (22% times / 0% titles agree)
+   - ZooMoo [USBC2400019EF]: Samsung 'Leo The Wildlife Ranger' vs Gracenote 'Jelly Jamm' (100% times / 0% titles agree)
+   - Telemundo Al Día [USBB3200016HO]: Samsung 'Hoy día' vs Gracenote 'De reina a reina' (91% times / 27% titles agree)
+   - CJ ENM K-POP [US39000038W]: Samsung 'M COUNTDOWN EP 937' vs Gracenote 'Stingray Today's K-Pop US' (25% times / 0% titles agree)
+wrote samsung.xml.gz (253 channels, 17675 programmes, Gracenote only)
+  hours of guide ahead — mapped   channels: median 57.3h, min 0.0h, max 60.8h  (n=276)
+  hours of guide ahead — unmapped channels: median 0.0h, min 0.0h, max 0.0h  (n=2389)
