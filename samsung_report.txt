@@ -1,0 +1,32 @@
+Samsung TV Plus build 2026-11-21 12:42 UTC
+Matt: 2676 channels in 11 regions (at ca ch de es fr gb in it kr us), 23792 programmes
+tvtv: 276 mapped channels in this lineup, 3 day(s) each (828 requests)
+tvtv: session via curl_cffi/chrome, homepage HTTP 200
+tvtv: data for 276 / 276 channels
+merge (Gracenote-only): 254 channels written from Gracenote, 0 auto-remapped, 22 left out (mapping didn't verify), 0 returned no airings
+  left out (no verified Gracenote station):
+   - Hallmark Holiday Favorites [USBD270001633]: Gracenote has only placeholder listings (e.g. 'To Be Announced')
+   - Maverick Black Cinema [USAJ3000007MT]: Samsung 'Captured' vs Gracenote 'The Laundry Room Stalker' (25% times / 0% titles agree)
+   - Brat TV [USBC240001823]: Samsung 'Mani' vs Gracenote 'Crown Lake' (0% times / 0% titles agree)
+   - Home Refresh [USBC21000142T]: Samsung 'Making it Home with Kortney and Kenny' vs Gracenote 'Buying the View' (14% times / 0% titles agree)
+   - Tastemade Home [USBC3200022W6]: Samsung 'World's Most Secret Hotels' vs Gracenote 'Property Brothers' (0% times / 0% titles agree)
+   - Emeril Lagasse Channel [US4500010B0]: Samsung 'Emeril's Table' vs Gracenote 'Essence of Emeril' (18% times / 9% titles agree)
+   - America's Test Kitchen [USBA3800002KI]: Samsung 'America's Test Kitchen' vs Gracenote 'Julia at Home' (25% times / 8% titles agree)
+   - Yahoo! Sports Network [US3200012O8]: Samsung 'Andy & Ari' vs Gracenote 'The Boys in the Back' (0% times / 0% titles agree)
+   - Overtime [US33000154M]: Samsung 'Deestroying & AJ Green's Team in OT7 Finals: Part 2' vs Gracenote 'Hello Newmans' (0% times / 0% titles agree)
+   - Pac-12 Channel [USBA300034DB]: Samsung 'Pac-12 Football Classics' vs Gracenote 'Olympic Sports Encore' (25% times / 0% titles agree)
+   - SURFER TV [USBB10000058A]: Samsung 'Good Call: A Skimboard Odyssey' vs Gracenote 'Channel No Longer Available' (0% times / 0% titles agree)
+   - Discovery Turbo TV [USBC3600005U9]: Samsung 'Runs Good' vs Gracenote 'Car Fix' (43% times / 0% titles agree)
+   - LOL! Network [USBC1300009VM]: Samsung 'Re-Living Single' vs Gracenote 'Real Husbands of Hollywood' (29% times / 0% titles agree)
+   - Laff More [US3700002P0]: Samsung 'The Lucy Show' vs Gracenote 'According to Jim' (100% times / 36% titles agree)
+   - Nosey [USAJ34000022E]: Samsung 'Jerry Springer' vs Gracenote 'Channel No Longer Available' (0% times / 0% titles agree)
+   - It’s Anime [US11000020V]: Samsung 'TOUGEN ANKI' vs Gracenote 'Hakkenden: Eight Dogs of the East' (27% times / 0% titles agree)
+   - Anime All day [USAJ3504502A]: Samsung 'A x Surprising x Win' vs Gracenote 'Hakkenden: Eight Dogs of the East' (27% times / 0% titles agree)
+   - Love Pets [US300065DB]: Samsung 'Pick a Puppy' vs Gracenote 'Lucky Dog' (14% times / 0% titles agree)
+   - ZooMoo [USBC2400019EF]: Samsung 'Pop Safari' vs Gracenote 'Cuentos Pop' (100% times / 0% titles agree)
+   - Telemundo Al Día [USBB3200016HO]: Samsung 'Al rojo vivo' vs Gracenote 'Hoy día' (90% times / 30% titles agree)
+   - CJ ENM K-POP [US39000038W]: Samsung '🍂 Time for a Playlist Update 💿 | September 2026 K-POP Stages' vs Gracenote 'Stingray Today's K-Pop US' (0% times / 0% titles agree)
+   - Beach Bonfire Vibes [US14000119Q]: Samsung 'Campfire by Beach Sunset' vs Gracenote 'Beach Bonfire' (20% times / 0% titles agree)
+wrote samsung.xml.gz (254 channels, 18481 programmes, Gracenote only)
+  hours of guide ahead — mapped   channels: median 59.4h, min 0.0h, max 64.6h  (n=276)
+  hours of guide ahead — unmapped channels: median 0.0h, min 0.0h, max 0.0h  (n=2400)
