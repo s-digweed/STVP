@@ -1,0 +1,31 @@
+Samsung TV Plus build 2026-11-28 07:54 UTC
+Matt: 2669 channels in 11 regions (at ca ch de es fr gb in it kr us), 23758 programmes
+tvtv: 276 mapped channels in this lineup, 3 day(s) each (828 requests)
+tvtv: session via curl_cffi/chrome, homepage HTTP 200
+tvtv: data for 276 / 276 channels
+merge (Gracenote-only): 255 channels written from Gracenote, 0 auto-remapped, 21 left out (mapping didn't verify), 0 returned no airings
+  left out (no verified Gracenote station):
+   - Bloomberg Originals [USAJ30000041W]: Samsung 'Bloomberg Originals' vs Gracenote 'The Circuit With Emily Chang' (67% times / 33% titles agree)
+   - Hallmark Holiday Favorites [USBD270001633]: Gracenote has only placeholder listings (e.g. 'To Be Announced')
+   - Maverick Black Cinema [USAJ3000007MT]: Samsung 'The Kissing Bandit' vs Gracenote 'Double Standards 2' (0% times / 0% titles agree)
+   - Brat TV [USBC240001823]: Samsung 'On The Ropes' vs Gracenote 'Total Eclipse' (11% times / 0% titles agree)
+   - Home Refresh [USBC21000142T]: Samsung 'Chateau DIY' vs Gracenote 'All for Nothing?' (40% times / 0% titles agree)
+   - Emeril Lagasse Channel [US4500010B0]: Samsung 'Essence of Emeril' vs Gracenote 'Emeril's Table' (8% times / 0% titles agree)
+   - America's Test Kitchen [USBA3800002KI]: Samsung 'America's Test Kitchen' vs Gracenote 'Cook's Country' (15% times / 0% titles agree)
+   - Hungry [USAJ2200009C2]: Samsung 'Exploring Europe's Great Food Markets' vs Gracenote 'Food Markets: In the Belly of the City' (58% times / 0% titles agree)
+   - SURFER TV [USBB10000058A]: Samsung 'Archy: Built for Speed, Born to Ride' vs Gracenote 'Channel No Longer Available' (0% times / 0% titles agree)
+   - Discovery Turbo TV [USBC3600005U9]: Samsung 'Faster With Finnegan' vs Gracenote 'All Girls Garage' (50% times / 0% titles agree)
+   - LOL! Network [USBC1300009VM]: Samsung 'A Haunted House 2' vs Gracenote 'Real Husbands of Hollywood' (56% times / 22% titles agree)
+   - America's Got Talent [US3500006VF]: Samsung 'AGT's Bizarre Acts' vs Gracenote 'The Power of the Golden Buzzer' (0% times / 0% titles agree)
+   - Nosey [USAJ34000022E]: Samsung 'Sally' vs Gracenote 'Channel No Longer Available' (0% times / 0% titles agree)
+   - It’s Anime [US11000020V]: Samsung 'Dorohedoro Season1' vs Gracenote 'I've Somehow Gotten Stronger When I Improved My Farm-Related Skills' (31% times / 0% titles agree)
+   - Anime All day [USAJ3504502A]: Samsung 'Glare' vs Gracenote 'I've Somehow Gotten Stronger When I Improved My Farm-Related Skills' (31% times / 0% titles agree)
+   - Love Pets [US300065DB]: Samsung 'Wild Rose Vet' vs Gracenote 'Dr. Chris: Pet Vet' (27% times / 0% titles agree)
+   - WildEarth [US3800007CR]: Samsung 'Escape to Nature' vs Gracenote 'LIVE at the Waterhole' (50% times / 0% titles agree)
+   - ZooMoo [USBC2400019EF]: Samsung 'Jelly Jamm' vs Gracenote 'Contando con Paula' (100% times / 8% titles agree)
+   - Telemundo Al Día [USBB3200016HO]: Samsung 'Juego de villanos' vs Gracenote 'Persiguiendo injusticias' (88% times / 12% titles agree)
+   - CJ ENM K-POP [US39000038W]: Samsung 'M COUNTDOWN EP 937' vs Gracenote 'Stingray Today's K-Pop US' (0% times / 0% titles agree)
+   - Storm Vibes [US1400014N9]: Samsung 'Ambient Thunderstorms' vs Gracenote 'Deep Forest Blizzard & Soothing Winter Winds' (0% times / 0% titles agree)
+wrote samsung.xml.gz (255 channels, 19841 programmes, Gracenote only)
+  hours of guide ahead — mapped   channels: median 64.3h, min 0.0h, max 69.1h  (n=276)
+  hours of guide ahead — unmapped channels: median 0.0h, min 0.0h, max 0.0h  (n=2393)
